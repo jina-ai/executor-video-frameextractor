@@ -1,0 +1,46 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [🏗️ STEPS TO CREATE AN EXECUTOR](#-steps-to-create-an-executor)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# 🏗️ STEPS TO CREATE AN EXECUTOR
+
+1. Create a new repo with the template `jina-ai/executor-template`. Follow the repository naming convention in the [Guideline](GUIDELINES.md#repository)
+
+	![create from github template](img/create.png)
+
+1. Add `admin` access to `jina-ai/engineering`, `jina-ai/team-ml` and `jina-ai/jina-bot`.
+   
+   ![manage access](img/access.png)
+   
+1. Add a branch protection rule for the main branch:
+
+   ![branch protection](img/branch-protection.png)
+   ![branch rule](img/branch-rule.png)
+   
+1. Replace the following variables in `setup.py`, `manifest.yml`, `config.yml`, `MODULE_NAME.py`
+	- `MyDummyExecutor`
+	- `jinahub-MY-DUMMY-EXECUTOR`
+	- `EXECUTOR_REPO_NAME`
+	- `SUB_PACKAGE_NAME`
+	- `MODULE_NAME`
+
+1. Implement your executor and write tests
+
+1. Write `README.md`
+
+1. Push the executor to jina hub:
+```shell
+jina hub push .
+```
+
+1. Get the received `ID` and `Secret` and add them to github secrets:
+   * store `ID` as a secret with name `HUBBLE_UUID`
+   * store `Secret` as a secret with name `HUBBLE_SECRET`
+	
+   ![secrets page](img/secrets.png)
+   ![add secret](img/add-secret.png)
+   
