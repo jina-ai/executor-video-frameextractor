@@ -1,4 +1,5 @@
-jtype: MyDummyExecutor
+jtype: VideoFrameExtractor
 metas:
+  workspace: 'workspace'
   py_modules:
-    - MODULE_NAME.py
+    - executor.py
