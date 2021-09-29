@@ -1,1 +1,2 @@
-
+jina==2.1.4
+jina-commons @ git+https://github.com/jina-ai/jina-commons.git@v0.0.5#egg=jina-commons
