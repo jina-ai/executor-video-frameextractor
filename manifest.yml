@@ -1,2 +1,5 @@
 manifest_version: 1
 name: VideoFrameExtractor
+description: An executor that extract the frames from videos with `ffmpeg`
+url: https://github.com/jina-ai/executor-video-frameextractor
+keywords: [frames extractor video ffmpeg]

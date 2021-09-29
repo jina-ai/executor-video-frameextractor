@@ -1,4 +1,5 @@
 # VideoFrameExtractor
+**FrameExtractor** is an executor that extracts frames from videos with `ffmpeg`
 
 
 ## Usage
