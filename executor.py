@@ -1,26 +1,29 @@
-import numpy as np
-import subprocess
-import os
 import glob
-import urllib.request
-import random
 import io
-import string
+import os
+import random
 import shutil
+import string
+import subprocess
+import urllib.request
+from typing import Optional
 
+import numpy as np
 from jina import Document, DocumentArray, Executor, requests
 from jina.logging.logger import JinaLogger
 from jina.types.document import _is_datauri
 
-
-DEFAULT_FPS=1
+DEFAULT_FPS = 1
 
 
 class VideoFrameExtractor(Executor):
     """
     Extract the frames from videos with `ffmpeg`
     """
-    def __init__(self, max_num_frames: int = 50, fps=DEFAULT_FPS, debug=False, **kwargs):
+
+    def __init__(
+        self, max_num_frames: int = 50, fps=DEFAULT_FPS, debug=False, **kwargs
+    ):
         """
 
         :param max_num_frames:
@@ -31,18 +34,27 @@ class VideoFrameExtractor(Executor):
         super().__init__(**kwargs)
         self.max_num_frames = max_num_frames
         self.fps = fps
-        self.logger = JinaLogger(getattr(self.metas, 'name', self.__class__.__name__)).logger
+        self.logger = JinaLogger(
+            getattr(self.metas, 'name', self.__class__.__name__)
+        ).logger
         self.debug = debug
 
     @requests(on='/index')
-    def extract(self, docs: DocumentArray, **kwargs):
+    def extract(self, docs: Optional[DocumentArray] = None, **kwargs):
         """
         Load the video from the Document.uri, extract frames and save the frames into chunks.blob
 
         :param docs: the input Documents with either the video file name or URL in the `uri` field
         """
+        if not docs:
+            return
+
         for doc in docs:
             self.logger.info(f'received {doc.id}')
+
+            if doc.uri == '':
+                raise ValueError(f'No uri passed along with the Document for {doc.id}')
+
             frame_fn_list = self._extract(doc.uri)
             for frame_fn in frame_fn_list:
                 self.logger.debug(f'frame: {frame_fn}')
@@ -68,7 +80,8 @@ class VideoFrameExtractor(Executor):
             subprocess.check_call(
                 f'ffmpeg -loglevel panic -i {source_fn} -vsync 0 -vf fps={self.fps} -frame_pts true -s 960x540 '
                 f'{os.path.join(target_path, f"%d.jpg")} >/dev/null 2>&1',
-                shell=True)
+                shell=True,
+            )
         except subprocess.CalledProcessError as e:
             self.logger.error(f'frame extraction failed, {uri}, {e}')
         finally:
@@ -76,13 +89,15 @@ class VideoFrameExtractor(Executor):
                 result.append(fn)
             if _is_datauri(uri):
                 os.remove(source_fn)
-            return result[:self.max_num_frames]
+            return result[: self.max_num_frames]
 
     def _save_uri_to_tmp_file(self, uri):
         req = urllib.request.Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
         tmp_fn = os.path.join(
             self.workspace,
-            ''.join([random.choice(string.ascii_lowercase) for i in range(10)]) + '.mp4')
+            ''.join([random.choice(string.ascii_lowercase) for i in range(10)])
+            + '.mp4',
+        )
         with urllib.request.urlopen(req) as fp:
             buffer = fp.read()
             binary_fn = io.BytesIO(buffer)
@@ -104,4 +119,3 @@ class VideoFrameExtractor(Executor):
 
     def _get_timestamp_from_filename(self, uri):
         return os.path.basename(uri).split('.')[0]
-
